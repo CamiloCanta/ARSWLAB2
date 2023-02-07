@@ -18,7 +18,7 @@ public class Control extends Thread {
 
     private final int NDATA = MAXVALUE / NTHREADS;
 
-    private PrimeFinderThread pft[];
+    private PrimeFinderThread[] pft;
 
     private Control() {
         super();
@@ -39,9 +39,8 @@ public class Control extends Thread {
 
     private boolean IsAlive() {
 
-        for (PrimeFinderThread primeThread : pft){
+        for (PrimeFinderThread primeThread : pft) {
             if (primeThread.isAlive()) {
-                //System.out.print("a");
                 return true;
             }
         }
@@ -49,29 +48,38 @@ public class Control extends Thread {
     }
 
 
-    private  void OutputNumberPrimesPartials() throws InterruptedException {
+    private void OutputNumberPrimesPartials() throws InterruptedException {
+
         for (int i = 0; i < NTHREADS; i++) {
-            int id = i+1;
-            System.out.println("Numero primos encontrados por el thread #" + id + " " + pft[i].getPrimes().size() + "\n");
-            pft[i].wait();
+            synchronized (pft[i]) {
+                int id = i + 1;
+                System.out.println("Numero primos encontrados por el thread #" + id + " " + pft[i].getPrimes().size() + "\n");
+                pft[i].wait();
+            }
         }
+
+
     }
 
 
-    private synchronized void wakeUpThreads(){
-        for(int i = 0; i < NTHREADS;i++ ){
-            System.out.println("Hilo # " + i+1 + " se desperto");
-            pft[i].notify();
+    private void wakeUpThreads() {
+        for (int i = 0; i < NTHREADS; i++) {
+            synchronized (pft[i]) {
+                int id = i + 1;
+                System.out.println("Hilo # " + id + " se desperto");
+                pft[i].notify();
+            }
         }
-    }
 
+
+    }
 
 
     @Override
     public void run() {
 
         //correr hilos
-        for(int i = 0;i < NTHREADS;i++ ) {
+        for (int i = 0; i < NTHREADS; i++) {
             pft[i].start();
 
         }
@@ -83,34 +91,37 @@ public class Control extends Thread {
 
 
         long time = System.currentTimeMillis() + TMILISECONDS;
+        boolean continueProccess = true;
+        while (IsAlive()) {
 
-        System.out.println(IsAlive());
-        while(IsAlive()){
-            boolean continueProccess = true;
 
-            if(System.currentTimeMillis() >= time){
+            if (System.currentTimeMillis() >= time) {
                 try {
                     OutputNumberPrimesPartials();
                     continueProccess = false;
-
-
+                    System.out.println(IsAlive());
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
+            System.out.println(continueProccess);
 
-            while(!continueProccess){
+            while (!continueProccess) {
                 System.out.println("PRESIONE ENTER PARA CONTINUAR");
-                if(sc.nextLine().equals("")){
+                if (sc.nextLine().equals("")) {
                     wakeUpThreads();
+                    continueProccess = true;
                 }
-                continueProccess = true;
-
-
+                System.out.println(IsAlive());
             }
+
+
+
         }
         System.out.println("fin");
-
     }
 
+
+
 }
+

@@ -5,6 +5,7 @@
  */
 package edu.eci.arsw.primefinder;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -20,16 +21,18 @@ public class Control extends Thread {
 
     private PrimeFinderThread[] pft;
 
+    private final ArrayList<Integer> primes;
+
     private Control() {
         super();
         this.pft = new PrimeFinderThread[NTHREADS];
-
         int i;
+        this.primes = new ArrayList<Integer>();
         for (i = 0; i < NTHREADS - 1; i++) {
-            PrimeFinderThread elem = new PrimeFinderThread(i * NDATA, (i + 1) * NDATA);
+            PrimeFinderThread elem = new PrimeFinderThread(i * NDATA, (i + 1) * NDATA, primes);
             pft[i] = elem;
         }
-        pft[i] = new PrimeFinderThread(i * NDATA, MAXVALUE + 1);
+        pft[i] = new PrimeFinderThread(i * NDATA, MAXVALUE + 1,primes);
     }
 
     public static Control newControl() {
@@ -49,26 +52,18 @@ public class Control extends Thread {
 
 
     private void OutputNumberPrimesPartials() throws InterruptedException {
+        System.out.println("Numero primos encontrados" + " " + primes.size() + "\n");
 
-        for (int i = 0; i < NTHREADS; i++) {
-            synchronized (pft[i]) {
-                int id = i + 1;
-                System.out.println("Numero primos encontrados por el thread #" + id + " " + pft[i].getPrimes().size() + "\n");
-                pft[i].wait();
-            }
-        }
+
 
 
     }
 
 
     private void wakeUpThreads() {
-        for (int i = 0; i < NTHREADS; i++) {
-            synchronized (pft[i]) {
-                int id = i + 1;
-                System.out.println("Hilo # " + id + " se desperto");
-                pft[i].notify();
-            }
+        //notifica que todos lo pueden usar
+        synchronized (primes){
+            primes.notifyAll();
         }
 
 
@@ -99,12 +94,11 @@ public class Control extends Thread {
                 try {
                     OutputNumberPrimesPartials();
                     continueProccess = false;
-                    System.out.println(IsAlive());
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
-            System.out.println(continueProccess);
+
 
             while (!continueProccess) {
                 System.out.println("PRESIONE ENTER PARA CONTINUAR");
@@ -112,12 +106,13 @@ public class Control extends Thread {
                     wakeUpThreads();
                     continueProccess = true;
                 }
-                System.out.println(IsAlive());
+
             }
 
 
 
         }
+        System.out.println("NUMEROS EN TOTAL :" + primes.size());
         System.out.println("fin");
     }
 

@@ -1,5 +1,6 @@
 package edu.eci.arsw.primefinder;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -30,6 +31,8 @@ public class PrimeFinderThread extends Thread{
 
     private List<Integer> primes;
 
+
+    private ArrayList<Integer> count;
     public PrimeFinderThread(int a, int b) {
         super();
         this.primes = new LinkedList<>();
@@ -37,17 +40,34 @@ public class PrimeFinderThread extends Thread{
         this.b = b;
     }
 
-    private synchronized  void addPrime(){
-        for (int i= a;i < b;i++){
-            if (isPrime(i)){
-                primes.add(i);
+    public PrimeFinderThread(int a, int b,ArrayList<Integer> count) {
+        super();
+        this.primes = new LinkedList<>();
+        this.a = a;
+        this.b = b;
+        this.count = count;
+
+    }
+
+    private void addPrime() throws InterruptedException {
+        synchronized (count) {
+            for (int i = a; i < b; i++) {
+                if (isPrime(i)) {
+                    primes.add(i);
+                    count.add(i);
+                }
             }
+            count.wait();
         }
     }
 
     @Override
     public void run(){
-        addPrime();
+        try {
+            addPrime();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     boolean isPrime(int n) {

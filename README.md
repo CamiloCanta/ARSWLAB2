@@ -1,5 +1,6 @@
 ### Escuela Colombiana de Ingeniería
 ## Arquitecturas de Software - ARSW
+## Integrantes: Julian Castillo Soto - Camilo Cantillo Tatis
 
 #### Laboratorio - Programación concurrente, condiciones de carrera, esquemas de sincronización, colecciones sincronizadas y concurrentes.
 

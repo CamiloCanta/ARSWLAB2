@@ -8,6 +8,7 @@ public class PrimeFinderThread extends Thread{
 
 
     int a,b;
+    private boolean sleep;
 
     public int getA() {
         return a;
@@ -30,36 +31,67 @@ public class PrimeFinderThread extends Thread{
     }
 
     private List<Integer> primes;
+    private static Integer count = 0;
 
 
-    private ArrayList<Integer> count;
+    public static Integer getCount() {
+        return count;
+    }
+
+    public static void setCount(Integer count) {
+        PrimeFinderThread.count = count;
+    }
+
     public PrimeFinderThread(int a, int b) {
         super();
         this.primes = new LinkedList<>();
         this.a = a;
         this.b = b;
+        sleep = false;
     }
 
-    public PrimeFinderThread(int a, int b,ArrayList<Integer> count) {
-        super();
-        this.primes = new LinkedList<>();
-        this.a = a;
-        this.b = b;
-        this.count = count;
 
-    }
+
 
     private void addPrime() throws InterruptedException {
-        synchronized (count) {
             for (int i = a; i < b; i++) {
-                if (isPrime(i)) {
-                    primes.add(i);
-                    count.add(i);
+                if(sleep){
+                    waitPrime();
                 }
+                else{
+                    {
+                        if (isPrime(i)) {
+                            primes.add(i);
+                            synchronized (count){
+                                count ++;
+                            }
+                        }
+                    }
+                }
+
+
             }
-            count.wait();
-        }
+
     }
+
+
+    private  synchronized void waitPrime() throws InterruptedException {
+        this.wait();
+    }
+
+    public synchronized void notifyPrime(){
+        sleep = false;
+        this.notify();
+    }
+
+    public void sleepExecute(){
+        sleep = true;
+
+    }
+
+
+
+
 
     @Override
     public void run(){

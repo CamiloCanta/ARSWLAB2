@@ -25,12 +25,37 @@ public class Snake extends Observable implements Runnable {
     private int jumps = 0;
     private boolean isSelected = false;
     private int growing = 0;
+    private boolean pause;
     public boolean goal = false;
+    private Object pauseObject;
+
+
+
+
+    public void stop(){
+        this.pause = true;
+    }
+
+    public void startGame(){
+        this.pause = false;
+        synchronized (pauseObject){
+            pauseObject.notify();
+        }
+    }
 
     public Snake(int idt, Cell head, int direction) {
         this.idt = idt;
         this.direction = direction;
         generateSnake(head);
+
+    }
+
+    public Snake(int idt, Cell head, int direction,Object pauseObject) {
+        this.idt = idt;
+        this.direction = direction;
+        generateSnake(head);
+        this.pauseObject = pauseObject;
+        this.pause = false;
 
     }
 
@@ -48,6 +73,7 @@ public class Snake extends Observable implements Runnable {
     @Override
     public void run() {
         while (!snakeEnd) {
+
             
             snakeCalc();
 
@@ -56,6 +82,17 @@ public class Snake extends Observable implements Runnable {
             notifyObservers();
 
             try {
+                synchronized (pauseObject){
+                    try{
+                        if(this.pause){
+                            pauseObject.wait();
+                        }
+
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+
+                }
                 if (hasTurbo == true) {
                     Thread.sleep(500 / 3);
                 } else {

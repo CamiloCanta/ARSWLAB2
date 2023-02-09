@@ -1,0 +1,20 @@
+2. De acuerdo con lo anterior, y con la lógica del juego, identifique y escriba claramente (archivo RESPUESTAS.txt): 
+
+Condiciones de carrera: Podemos ver que en la clase snakeapp se estan presentando modificaciones en la variable x
+sin sincronización de ningun tipo, lo cual provoca la condiciones de carrera.
+
+
+Uso inadecuado de colecciones: Cuando se aumenta la velocidad varias snakes aparecen 
+en el campo aleatoriamente cuando no debería ser así.
+
+
+Uso innecesario de esperas activas: Algunas serpientes estan quedando en un estado de espera (waiting) en el hilo.
+
+
+3.
+Identifique las regiones críticas asociadas a las condiciones de carrera, y haga algo para eliminarlas. Tenga en cuenta que se debe sincronizar estríctamente LO NECESARIO. En su documento de respuestas indique, la solución realizada para cada ítem del punto 2. Igualmente tenga en cuenta que en los siguientes puntos NO se deben agregar más posibles condiciones de carrera.
+
+
+Usamos AtomicInteger para remplazar el int x = 0 como contador y que no de error con el uso de los hilos, 
+por otro lado para solucionar las esperas activas hacemos uso de un objeto que se instancia en cada serpiente (hilo)
+que nos permite despertar los hilos mediante dicho objeto y no generar las esperas activas indeseadas.
